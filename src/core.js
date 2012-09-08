@@ -924,7 +924,8 @@ var me = me || {};
 			}
 
 			// if obj is visible add it to the list of obj to draw
-			if (obj.visible) {
+			if ((obj.isSprite && obj.inViewport) ||
+			(!obj.isSprite && obj.visible)) {
 				// add obj at index 0, so that we can keep
 				// our inverted loop later
 				dirtyObjects.unshift(obj);
@@ -954,15 +955,15 @@ var me = me || {};
 			if (idx != -1) {
 				// remove the object from the list of obj to draw
 				dirtyObjects.splice(idx, 1);
-				// save the visible state of the object
-				var wasVisible = obj.visible;
-				// mark the object as not visible
-				// so it won't be added (again) in the list object to be draw
-				obj.visible = false;
+
+				if (obj.isSprite) {
+					// mark the object as not within the viewport
+					// so it won't be added (again) in the list object to be draw
+					obj.inViewport = false;
+				}
+
 				// and flag the area as dirty
 				api.makeDirty(obj, true);
-				// restore visible state, this is needed for "persistent" object like screenObject
-				obj.visible = wasVisible;
 			}
  		};
 
@@ -984,7 +985,7 @@ var me = me || {};
 				for ( var o = dirtyObjects.length, obj; o--,
 						obj = dirtyObjects[o];) {
 					// if dirty region enabled, make sure the object is in the area to be refreshed
-					if (me.sys.dirtyRegion && obj.isEntity
+					if (me.sys.dirtyRegion && obj.isSprite
 							&& !obj.overlaps(rect)) {
 						continue;
 					}
@@ -1405,14 +1406,14 @@ var me = me || {};
 			// loop through our objects
 			for ( var i = gameObjects.length, obj; i--, obj = gameObjects[i];) {
 				// check for previous rect before position change
-				oldRect = (me.sys.dirtyRegion && obj.isEntity) ? obj.getRect() : null;
+				oldRect = (me.sys.dirtyRegion && obj.isSprite) ? obj.getRect() : null;
 
 				// update our object
 				var updated = obj.update();
 
 				// check if object is visible
-				if (obj.isSprite) {
-					obj.visible = api.viewport.isVisible(obj);
+				if (obj.isSprite && obj.visible) {
+					obj.inViewport = api.viewport.isVisible(obj);
 				}
 
 				// add it to the draw manager
@@ -1451,8 +1452,8 @@ var me = me || {};
 				obj.visible = false
 				// ensure it won't be turn back to visible later
 				// PS: may be use obj.alive instead ?
-				if (obj.isEntity) {
-					obj.isEntity = false;
+				if (obj.isSprite) {
+					obj.isSprite = false;
 				}
 				// else wait the end of the current loop
 				/** @private */
