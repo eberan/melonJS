@@ -1425,7 +1425,7 @@ var me = me || {};
 
 				// check if object is visible
 				if (obj.isSprite && obj.visible) {
-					obj.inViewport = api.viewport.isVisible(obj);
+					obj.inViewport = (obj.floating ? true : api.viewport.isVisible(obj));
 				}
 
 				// add it to the draw manager
