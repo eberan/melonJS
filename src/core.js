@@ -923,9 +923,8 @@ var me = me || {};
 				}
 			}
 
-			// if obj is visible add it to the list of obj to draw
-			if ((obj.isSprite && obj.inViewport) ||
-			(!obj.isSprite && obj.visible)) {
+			// if obj is in the viewport add it to the list of obj to draw
+			if (obj.inViewport) {
 				// add obj at index 0, so that we can keep
 				// our inverted loop later
 				dirtyObjects.unshift(obj);
@@ -956,26 +955,12 @@ var me = me || {};
 				// remove the object from the list of obj to draw
 				dirtyObjects.splice(idx, 1);
 
-				if (!obj.isSprite) {
-					// save the visible state of the object
-					obj.wasVisible = obj.visible;
-					// mark the object as not visible
-					// so it won't be added (again) in the list object to be draw
-					obj.visible = false;
-				}
-				else {
-					// mark the object as not within the viewport
-					// so it won't be added (again) in the list object to be draw
-					obj.inViewport = false;
-				}
+				// mark the object as not within the viewport
+				// so it won't be added (again) in the list object to be draw
+				obj.inViewport = false;
 
 				// and flag the area as dirty
 				api.makeDirty(obj, true);
-
-				if (!obj.isSprite) {
-					// restore visible state, this is needed for "persistent" object like screenObject
-					obj.visible = obj.wasVisible;
-				}
 			}
  		};
 
@@ -1424,8 +1409,8 @@ var me = me || {};
 				var updated = obj.update();
 
 				// check if object is visible
-				if (obj.isSprite && obj.visible) {
-					obj.inViewport = (obj.floating ? true : api.viewport.isVisible(obj));
+				if (obj.visible) {
+					obj.inViewport = (!obj.isSprite || obj.floating) ? true : api.viewport.isVisible(obj);
 				}
 
 				// add it to the draw manager
@@ -1715,11 +1700,12 @@ var me = me || {};
 	/** @scope me.ScreenObject.prototype */
 	{
 
-		visible		 : false,
-		addAsObject  : false,
-		isPersistent : false,
-		z			 : 999,
-		rect		 : null,
+		inViewport		: false,
+		visible			: false,
+		addAsObject		: false,
+		isPersistent	: false,
+		z				: 999,
+		rect			: null,
 
 		/**
 		 *	initialization function
