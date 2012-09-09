@@ -973,6 +973,7 @@ var me = me || {};
 				api.makeDirty(obj, true);
 
 				if (!obj.isSprite) {
+					// restore visible state, this is needed for "persistent" object like screenObject
 					obj.visible = obj.wasVisible;
 				}
 			}
