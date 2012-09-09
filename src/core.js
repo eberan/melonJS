@@ -956,7 +956,14 @@ var me = me || {};
 				// remove the object from the list of obj to draw
 				dirtyObjects.splice(idx, 1);
 
-				if (obj.isSprite) {
+				if (!obj.isSprite) {
+					// save the visible state of the object
+					obj.wasVisible = obj.visible;
+					// mark the object as not visible
+					// so it won't be added (again) in the list object to be draw
+					obj.visible = false;
+				}
+				else {
 					// mark the object as not within the viewport
 					// so it won't be added (again) in the list object to be draw
 					obj.inViewport = false;
@@ -964,6 +971,10 @@ var me = me || {};
 
 				// and flag the area as dirty
 				api.makeDirty(obj, true);
+
+				if (!obj.isSprite) {
+					obj.visible = obj.wasVisible;
+				}
 			}
  		};
 
@@ -1446,15 +1457,10 @@ var me = me || {};
 			// remove the object from the object list
 			if (force===true) {
 				// force immediate object deletion
-				gameObjects.remove(obj);	
+				gameObjects.remove(obj);
 			} else {
 				// make it invisible (this is bad...)
 				obj.visible = false
-				// ensure it won't be turn back to visible later
-				// PS: may be use obj.alive instead ?
-				if (obj.isSprite) {
-					obj.isSprite = false;
-				}
 				// else wait the end of the current loop
 				/** @private */
 				pendingDefer = (function (obj) {
@@ -1462,7 +1468,7 @@ var me = me || {};
 					pendingDefer = null;
 				}).defer(obj);
 			}
-      };
+		};
 
 		/**
 		 * remove all objects
