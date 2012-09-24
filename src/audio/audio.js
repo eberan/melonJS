@@ -212,7 +212,7 @@
 
 		function _play_audio_enable(sound_id, loop, callback) {
 			// console.log("play!!");
-			var soundclip = get(sound_id.toLowerCase());
+			var soundclip = get(sound_id);
 
 			soundclip.loop = loop || false;
 			soundclip.play();
@@ -394,15 +394,14 @@
 				soundLoadError(sound.name);
 			}, false);
 
-			soundclip.src = sound.src + sound.name + "." + activeAudioExt
-					+ me.nocache;
 
 			// document.body.appendChild(soundclip);
 
+			//set before load, exception handler needs this to be set.
+			audio_channels[sound.name] = [ soundclip ];
+
 			// load it
 			soundclip.load();
-
-			audio_channels[sound.name] = [ soundclip ];
 
 			return 1;
 		};
@@ -419,7 +418,7 @@
 		 */
 		obj.stop = function(sound_id) {
 			if (sound_enable) {
-				var sound = audio_channels[sound_id.toLowerCase()];
+				var sound = audio_channels[sound_id];
 				for (var channel_id = sound.length; channel_id--;) {
 					sound[channel_id].pause();
 					// force rewind to beginning
@@ -442,7 +441,7 @@
 		 */
 		obj.pause = function(sound_id) {
 			if (sound_enable) {
-				var sound = audio_channels[sound_id.toLowerCase()];
+				var sound = audio_channels[sound_id];
 				for (var channel_id = sound.length; channel_id--;) {
 					sound[channel_id].pause();
 				}
@@ -467,7 +466,6 @@
 				if (current_track != null)
 					obj.stopTrack();
 
-				sound_id = sound_id.toLowerCase();
 				current_track = get(sound_id);
 
 				if (current_track) {
@@ -539,7 +537,6 @@
 		 * @example me.audio.unload("awesome_music");
 		 */
 		obj.unload = function(sound_id) {
-			sound_id = sound_id.toLowerCase();
 			if (!(sound_id in audio_channels))
 				return false;
 
